@@ -105,11 +105,7 @@ pub mod buffer {
                     // SAFETY: unwrap here is safe because we have explicitly checked
                     //         the iterator has 1 element.
                     Cow::Borrowed(unsafe { slices.next().unwrap_unchecked() })
-                }
-                //_ => Cow::Owned(slices.fold(Vec::new(), |mut acc, it| {
-                //    acc.extend(it);
-                //    acc
-                //})),
+                } // Failure
                 //_ => {
                 //    let mut l = 0;
                 //    for s in slices.by_ref() {
@@ -121,7 +117,12 @@ pub mod buffer {
                 //    }
                 //    Cow::Owned(vec)
                 //}
-                // Yuan's patch
+                // Success
+                //_ => Cow::Owned(slices.fold(Vec::new(), |mut acc, it| {
+                //    acc.extend(it);
+                //    acc
+                //})),
+                // Yuan's patch => Failure
                 //_ => {
                 //    let total_len = slices.by_ref().map(|s| s.len()).sum();
                 //    let vec = slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
@@ -130,7 +131,7 @@ pub mod buffer {
                 //    });
                 //    Cow::Owned(vec)
                 //}
-                // New patch
+                // New patch => Failure
                 //_ => {
                 //    let total_len = slices.by_ref().map(|s| s.len()).sum();
                 //    Cow::Owned(slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
@@ -138,7 +139,7 @@ pub mod buffer {
                 //        acc
                 //    }))
                 //}
-                // Longer length patch
+                // Longer length patch => Failure
                 //_ => {
                 //    let total_len: usize = slices.by_ref().map(|s| s.len()).sum();
                 //    Cow::Owned(
@@ -148,14 +149,22 @@ pub mod buffer {
                 //        }),
                 //    )
                 //}
-                // Collect info
+                // Collect info => Failure
+                //_ => {
+                //    let total_len: usize = slices.by_ref().map(|s| s.len()).sum();
+                //    let a = slices.fold(Vec::new(), |mut acc, it| {
+                //        acc.extend(it);
+                //        acc
+                //    });
+                //    println!(">>> total_len={}, length={}", total_len, a.len());
+                //    Cow::Owned(a)
+                //}
+                // Another try
                 _ => {
-                    let total_len: usize = slices.by_ref().map(|s| s.len()).sum();
                     let a = slices.fold(Vec::new(), |mut acc, it| {
                         acc.extend(it);
                         acc
                     });
-                    println!(">>> total_len={}, length={}", total_len, a.len());
                     Cow::Owned(a)
                 }
             }
