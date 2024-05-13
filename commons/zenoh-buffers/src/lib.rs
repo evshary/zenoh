@@ -121,13 +121,22 @@ pub mod buffer {
                 //    }
                 //    Cow::Owned(vec)
                 //}
+                // Yuan's patch
+                //_ => {
+                //    let total_len = slices.by_ref().map(|s| s.len()).sum();
+                //    let vec = slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
+                //        acc.extend_from_slice(it); // or extend, the performance is similiar
+                //        acc
+                //    });
+                //    Cow::Owned(vec)
+                //}
+                // New patch
                 _ => {
                     let total_len = slices.by_ref().map(|s| s.len()).sum();
-                    let vec = slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
-                        acc.extend_from_slice(it); // or extend, the performance is similiar
+                    Cow::Owned(slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
+                        acc.extend(it);
                         acc
-                    });
-                    Cow::Owned(vec)
+                    }))
                 }
             }
         }
