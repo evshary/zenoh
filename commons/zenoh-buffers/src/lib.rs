@@ -131,12 +131,22 @@ pub mod buffer {
                 //    Cow::Owned(vec)
                 //}
                 // New patch
+                //_ => {
+                //    let total_len = slices.by_ref().map(|s| s.len()).sum();
+                //    Cow::Owned(slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
+                //        acc.extend(it);
+                //        acc
+                //    }))
+                //}
+                // Longer length patch
                 _ => {
-                    let total_len = slices.by_ref().map(|s| s.len()).sum();
-                    Cow::Owned(slices.fold(Vec::with_capacity(total_len), |mut acc, it| {
-                        acc.extend(it);
-                        acc
-                    }))
+                    let total_len: usize = slices.by_ref().map(|s| s.len()).sum();
+                    Cow::Owned(
+                        slices.fold(Vec::with_capacity(total_len + 1), |mut acc, it| {
+                            acc.extend(it);
+                            acc
+                        }),
+                    )
                 }
             }
         }
