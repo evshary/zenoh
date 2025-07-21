@@ -599,10 +599,10 @@ impl StageOutIn {
         }
 
         // Activate backoff
-        self.backoff.atomic.active.store(true, Ordering::Relaxed);
+        self.backoff.atomic.active.store(false, Ordering::Relaxed);
 
         // Do backoff
-        Pull::Backoff(backoff)
+        Pull::None
     }
 }
 
